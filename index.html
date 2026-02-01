@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Blackbird">
+  <meta name="theme-color" content="#000000">
+  <title>Blackbird Service Mécanique</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #000;
+      min-height: 100vh;
+      padding: 12px;
+      padding-bottom: 100px;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #000;
+      z-index: 100;
+    }
+    .logo { text-align: center; padding: 8px 0; }
+    .logo h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo p { font-size: 12px; letter-spacing: 3px; font-weight: 500; }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-top: 12px;
+      overflow-x: auto;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 2px solid #000;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .tab.active { background: #000; color: #fff; }
+    .progress-box {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .progress-pct { font-weight: 900; }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #000;
+      transition: width 0.3s ease;
+    }
+    .tier-info {
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+    }
+    .categories { margin-top: 12px; }
+    .category {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .category.complete { border-color: #000; background: #f9f9f9; }
+    .cat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #fff;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cat-name { font-weight: 700; font-size: 13px; }
+    .cat-name.complete { color: #000; }
+    .cat-right { display: flex; align-items: center; gap: 8px; }
+    .cat-count { font-size: 11px; color: #888; }
+    .cat-arrow { font-size: 11px; color: #888; }
+    .cat-items { background: #fff; }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid #eee;
+      cursor: pointer;
+      user-select: none;
+    }
+    .item:active { background: #f5f5f5; }
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #aaa;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .checkbox.checked {
+      background: #000;
+      border-color: #000;
+    }
+    .checkbox.checked::after {
+      content: '✓';
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .item-name { flex: 1; font-size: 13px; }
+    .item-name.checked { text-decoration: line-through; color: #999; }
+    .item-qty { font-size: 11px; color: #888; }
+    .reset-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #fff;
+      border: 2px solid #000;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .reset-btn:active { background: #000; color: #fff; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <img src="data:image/png;base64,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" alt="Blackbird Logo">
+      <h1>BLACKBIRD</h1>
+      <p>SERVICE MÉCANIQUE</p>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="progress-box">
+      <div class="progress-header">
+        <span id="progress-text">0/0 items</span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="tier-info" id="tier-info"></div>
+  </div>
+
+  <div class="categories" id="categories"></div>
+  
+  <button class="reset-btn" onclick="resetCurrent()">Reset Current Tier</button>
+  <button class="reset-btn" style="margin-top:8px;border-color:#999;color:#666;" onclick="resetAll()">Reset All Tiers</button>
+
+  <script>
+const toolData = {
+  "Priority 1": {
+    "Impact Wrenches & Drivers": [
+      ["1/2\" High-Torque Impact Wrench", 1],
+      ["3/8\" Mid-Torque Impact Wrench", 1],
+      ["Hex Impact Driver", 1],
+    ],
+    "Drills & Rotary Tools": [
+      ["Hammer Drill/Driver", 1],
+    ],
+    "Grinders & Cutting Tools": [
+      ["4-1/2\" Angle Grinder", 1],
+      ["Reciprocating Saw", 1],
+    ],
+    "Ratchets": [
+      ["3/8\" Ratchet", 1],
+      ["1/4\" Ratchet", 1],
+    ],
+    "Specialty Power Tools": [
+      ["Heat Gun", 1],
+      ["Grease Gun", 1],
+      ["Straight Die Grinder", 1],
+      ["90° Die Grinder", 1],
+    ],
+    "Batteries & Charging": [
+      ["Rapid Charger", 1],
+      ["M18 Batteries 5.0Ah", 4],
+      ["M18 Batteries 8.0Ah", 2],
+      ["M12 Batteries 4.0Ah", 2],
+      ["M12 Batteries 6.0Ah", 1],
+      ["50' Extension Cord 12/3", 1],
+    ],
+    "Engine Diagnostics": [
+      ["Compression Tester", 1],
+      ["Digital Multimeter", 1],
+      ["Infrared Thermometer", 1],
+      ["Cylinder Leak-Down Tester", 1],
+    ],
+    "Hydraulic Diagnostics": [
+      ["Hydraulic Test Kit", 1],
+      ["Hydraulic Flow Meter", 1],
+    ],
+    "Cooling System": [
+      ["Cooling System Tester", 1],
+      ["Refractometer", 1],
+    ],
+    "Electrical Testing": [
+      ["Amp Clamp Meter", 1],
+      ["Power Probe", 1],
+      ["Test Light", 1],
+      ["Basic Multimeter Backup", 1],
+    ],
+    "Connection Tools": [
+      ["Deutsch Crimper", 1],
+      ["Deutsch DT Kit", 1],
+      ["Deutsch Extraction Tools", 1],
+      ["Wire Stripper", 1],
+      ["Heat Shrink Butt Connectors", 200],
+    ],
+    "Starting & Charging": [
+      ["Jump Pack", 1],
+      ["Jumper Cables", 1],
+      ["Spare Fuses", 200],
+      ["Spare Relays", 50],
+    ],
+    "Combination Wrenches": [
+      ["Combination Metric Set", 1],
+      ["Combination SAE Set", 1],
+    ],
+    "Ratcheting Wrenches": [
+      ["Ratcheting Metric", 1],
+      ["Ratcheting SAE", 1],
+    ],
+    "Specialty Wrenches": [
+      ["Flare Nut Metric", 1],
+      ["Flare Nut SAE", 1],
+      ["Adjustable Wrench 10\"", 1],
+      ["Adjustable Wrench 12\"", 1],
+    ],
+    "3/8\" Drive": [
+      ["3/8\" Socket Set Metric", 1],
+      ["3/8\" Socket Set SAE", 1],
+      ["3/8\" Ratchet", 1],
+      ["3/8\" Flex-Head Ratchet", 1],
+      ["3/8\" Extensions", 1],
+      ["3/8\" Universal Joint", 1],
+    ],
+    "1/2\" Drive": [
+      ["1/2\" Impact Socket Metric", 1],
+      ["1/2\" Impact Socket SAE", 1],
+      ["1/2\" Chrome Socket Metric", 1],
+      ["1/2\" Ratchet", 1],
+      ["1/2\" Flex-Head Ratchet", 1],
+      ["1/2\" Breaker Bar 18\"", 1],
+      ["1/2\" Extensions", 1],
+      ["1/2\" Universal Joint", 1],
+    ],
+    "Drive Adapters": [
+      ["1/2\" Female x 3/8\" Male", 1],
+      ["3/4\" Female x 1/2\" Male", 1],
+      ["1\" Female x 3/4\" Male", 1],
+    ],
+    "Hex Keys": [
+      ["Allen Key L-Set Metric", 1],
+      ["Allen Key L-Set SAE", 1],
+      ["Torx Key Set", 1],
+    ],
+    "Pliers": [
+      ["Combination Pliers 8\"", 1],
+      ["Needle Nose 8\"", 1],
+      ["Diagonal Cutters 8\"", 1],
+      ["Channel Lock 10\"", 1],
+      ["Vise-Grip 10\"", 2],
+    ],
+    "Picks & Scrapers": [
+      ["Pick Set 4-Piece", 1],
+      ["Paint Scrapers", 2],
+      ["Carbide Scraper", 1],
+    ],
+    "Screwdrivers": [
+      ["Screwdriver Set", 1],
+      ["Ratcheting Multi-Bit", 1],
+      ["Valve Core Tool", 2],
+    ],
+    "Hammers": [
+      ["Ball Peen 16 oz", 1],
+      ["Ball Peen 32 oz", 1],
+      ["Sledge 10 lb", 1],
+      ["Dead Blow 3 lb", 1],
+      ["Rubber Mallet 24 oz", 1],
+    ],
+    "Measuring": [
+      ["Tape Measure 25'", 1],
+      ["Steel Rule 12\"", 1],
+      ["Speed Square 7\"", 1],
+      ["Digital Caliper 6\"", 1],
+      ["Feeler Gauge", 1],
+    ],
+    "Extractors": [
+      ["Screw Extractor Set", 1],
+    ],
+    "Taps & Dies": [
+      ["Tap Set Metric", 1],
+      ["Tap Set SAE", 1],
+      ["Tap Wrench", 1],
+    ],
+    "Files": [
+      ["File Set", 1],
+      ["File Card", 1],
+    ],
+    "Punches": [
+      ["Pin Punch Set", 1],
+      ["Center Punch Auto", 1],
+      ["Brass Punch Set", 1],
+    ],
+    "Cutting Tools": [
+      ["Hacksaw Frame", 1],
+      ["Hacksaw Blades", 100],
+      ["Utility Knife", 1],
+      ["Utility Blades", 100],
+      ["Cold Chisel Set", 1],
+      ["Bolt Cutters 24\"", 1],
+    ],
+    "Jacks": [
+      ["Floor Jack 3-Ton", 1],
+      ["Bottle Jack 12-Ton", 1],
+      ["Bottle Jack 20-Ton", 1],
+    ],
+    "Rigging": [
+      ["Grade 100 Chain 3/8\" x 20'", 1],
+      ["Grade 100 Chain 1/2\" x 20'", 1],
+      ["Nylon Sling 2\" x 10'", 2],
+      ["Nylon Sling 3\" x 15'", 1],
+      ["Shackles 1-Ton", 2],
+      ["Shackles 2-Ton", 2],
+      ["Shackles 3-Ton", 1],
+    ],
+    "Pry Bars": [
+      ["Pry Bar 12\"", 1],
+      ["Pry Bar 18\"", 1],
+      ["Pry Bar 24\"", 1],
+    ],
+    "Hydraulic Fittings": [
+      ["JIC Fittings Assortment", 300],
+      ["ORFS Fittings Assortment", 200],
+      ["NPT Fittings Assortment", 200],
+      ["Hydraulic Caps Plastic", 100],
+      ["Hydraulic Caps Steel", 50],
+      ["Large Blue Caps", 20],
+    ],
+    "Thread Lockers": [
+      ["Loctite 243 Blue", 1],
+      ["Loctite 271 Red", 1],
+    ],
+    "Gasket Makers": [
+      ["Loctite 515 Purple", 1],
+      ["Loctite 567 PST", 1],
+      ["Permatex Right Stuff", 1],
+      ["Permatex Ultra Grey", 2],
+    ],
+    "Anti-Seize": [
+      ["Nickel Anti-Seize", 1],
+      ["Copper Anti-Seize", 1],
+    ],
+    "Assembly Lubes": [
+      ["Hydraulic Assembly Lube", 1],
+      ["White Lithium Grease", 1],
+    ],
+    "Cleaners": [
+      ["Brake Cleaner", 6],
+      ["Parts Cleaner", 1],
+      ["Penetrating Oil", 2],
+      ["Contact Cleaner", 1],
+    ],
+    "Chemicals": [
+      ["Dielectric Grease", 1],
+      ["Battery Terminal Protector", 1],
+      ["Marking Paint", 4],
+      ["Layout Fluid", 1],
+      ["Paint Markers", 6],
+      ["Thread Tape White", 3],
+      ["Thread Tape Red", 2],
+    ],
+    "Shop Materials": [
+      ["Shop Rags Cotton", 1],
+      ["Blue Shop Towels", 30],
+    ],
+    "Consumables": [
+      ["Zip Ties 6\"", 500],
+      ["Zip Ties 8\"", 250],
+      ["Zip Ties 11\"", 100],
+      ["Heat Shrink Kit", 1],
+      ["Heat Shrink Connectors", 200],
+      ["Electrical Tape Black", 5],
+      ["Primary Wire Assorted", 1],
+      ["Wire Loom Split", 1],
+      ["Duct Tape", 2],
+      ["Hose Clamps Assorted", 150],
+    ],
+    "Safety Marking": [
+      ["Danger Tape", 1],
+      ["Caution Tape", 1],
+      ["Out of Service Tags", 50],
+    ],
+    "Soldering": [
+      ["Rosin-Core Solder", 1],
+    ],
+    "Air Tools": [
+      ["Air Blow Gun", 1],
+      ["Air Chuck with Gauge", 1],
+      ["Air FRL Unit", 1],
+      ["Water Separator", 1],
+    ],
+    "Fasteners": [
+      ["Metric Bolts Grade 10.9", 1500],
+      ["Metric Bolts Grade 8.8", 1000],
+      ["SAE Bolts Grade 8", 1500],
+      ["Metric Nuts", 1000],
+      ["Nylon Lock Nuts", 500],
+      ["Flange Lock Nuts", 300],
+      ["Flat Washers", 1000],
+      ["Lock Washers", 500],
+    ],
+    "Safety": [
+      ["Safety Glasses Clear", 3],
+      ["Safety Glasses Tinted", 1],
+      ["Nitrile Gloves", 1],
+      ["Leather Work Gloves", 2],
+      ["Hearing Muffs", 1],
+      ["Hearing Plugs", 1],
+      ["First Aid Kit", 1],
+      ["Fire Extinguisher 10 lb", 1],
+      ["Spill Kit", 1],
+      ["Hard Hat", 1],
+      ["Hi-Vis Vest", 1],
+    ],
+    "Lighting": [
+      ["M18 Flood Light", 1],
+      ["Headlamp Rechargeable", 1],
+      ["Magnetic LED Work Light", 1],
+      ["Flashlight", 1],
+    ],
+    "Storage": [
+      ["Toolbox/Service Body", 1],
+      ["Socket Rails", 1],
+      ["Wrench Organizers", 1],
+      ["Parts Trays", 1],
+    ],
+  },
+  "Priority 2": {
+    "Impact Wrenches": [
+      ["3/4\" Drive Impact", 1],
+      ["1\" Drive Impact", 1],
+    ],
+    "Drills": [
+      ["Right Angle Drill", 1],
+    ],
+    "Grinders": [
+      ["7\"/9\" Large Angle Grinder", 1],
+    ],
+    "Ratchets": [
+      ["3/8\" Ratchet Compact", 1],
+    ],
+    "Specialty Power": [
+      ["Induction Heater", 1],
+      ["Fluid Transfer Pump", 1],
+      ["Vacuum Wet/Dry", 1],
+    ],
+    "Power Distribution": [
+      ["M18 Power Inverter", 1],
+      ["100' Extension Cord 10/3", 1],
+    ],
+    "Engine Diagnostics": [
+      ["Diesel Fuel Pressure Kit", 1],
+      ["Borescope", 1],
+      ["Exhaust Backpressure Gauge", 1],
+    ],
+    "Hydraulic Diagnostics": [
+      ["Hydraulic Pressure Test Hose Kit", 1],
+      ["Hydraulic Temperature Gauge", 2],
+      ["Nitrogen Accumulator Kit", 1],
+    ],
+    "OEM Diagnostics": [
+      ["Oscilloscope", 1],
+      ["CAT ET Adapter", 1],
+      ["John Deere Interface", 1],
+      ["Komatsu Interface", 1],
+    ],
+    "Electrical Testing": [
+      ["Megger", 1],
+      ["Battery Tester", 1],
+      ["Circuit Tracer", 1],
+    ],
+    "Connector Kits": [
+      ["Weather-Pack Kit", 1],
+      ["Metri-Pack Kit", 1],
+      ["AMP Superseal Kit", 1],
+      ["Back Probe Kit", 1],
+    ],
+    "Wrenches Large": [
+      ["Extra Large Metric Set", 1],
+      ["Stubby Wrench Set", 1],
+      ["Large Ratcheting Metric", 1],
+      ["Striking Wrench Set", 1],
+    ],
+    "Torque Wrenches": [
+      ["Torque Wrench 1/4\"", 1],
+      ["Torque Wrench 3/8\"", 1],
+      ["Torque Wrench 1/2\"", 1],
+    ],
+    "3/4\" Drive": [
+      ["3/4\" Impact Socket Metric", 1],
+      ["3/4\" Impact Socket SAE", 1],
+      ["3/4\" Ratchet", 1],
+      ["3/4\" Breaker Bar 24\"", 1],
+      ["3/4\" Extensions", 1],
+      ["3/4\" Universal Joint", 1],
+    ],
+    "1\" Drive": [
+      ["1\" Impact Socket Metric", 1],
+      ["1\" Breaker Bar 48\"", 1],
+      ["1\" Extensions", 1],
+    ],
+    "Specialty Sockets": [
+      ["Allen Key T-Handle Metric", 1],
+      ["Large Allen Keys", 1],
+      ["1/2\" Allen Socket Metric", 1],
+      ["1/2\" Allen Socket SAE", 1],
+    ],
+    "Pliers Advanced": [
+      ["Snap Ring Internal 7\"", 1],
+      ["Snap Ring External 7\"", 1],
+      ["Large Snap Ring 12\"", 1],
+      ["Hose Pinch Pliers", 1],
+      ["Filter Pliers", 1],
+    ],
+    "Screwdrivers": [
+      ["Precision Set", 1],
+      ["Extra Long Set", 1],
+      ["Impact Driver Bit Set", 1],
+    ],
+    "Hammers": [
+      ["Sledge 4 lb", 1],
+      ["Sledge 20 lb", 1],
+      ["Dead Blow 5 lb", 1],
+      ["Brass Hammer 2 lb", 1],
+    ],
+    "Precision Measuring": [
+      ["Micrometer 0-1\"", 1],
+      ["Micrometer 1-2\"", 1],
+      ["Micrometer 2-3\"", 1],
+      ["Dial Indicator", 1],
+      ["Bore Gauge 2-6\"", 1],
+    ],
+    "Extractors": [
+      ["Large Easy-Out Set", 1],
+      ["Stud Remover Set", 1],
+    ],
+    "Thread Repair": [
+      ["Large Tap Set Metric", 1],
+      ["Pipe Tap Set", 1],
+      ["Helicoil Kit Master", 1],
+      ["Time-Sert Kit", 1],
+    ],
+    "Punches Heavy": [
+      ["Heavy-Duty Pin Punch Set", 1],
+      ["Alignment Punch Set", 1],
+      ["Transfer Punch Set", 1],
+    ],
+    "Cutting Advanced": [
+      ["Tubing Cutter Small", 1],
+      ["Tubing Cutter Large", 1],
+      ["Hydraulic Hose Cutter", 1],
+      ["Bolt Cutters 42\"", 1],
+    ],
+    "Oxy-Fuel Torch": [
+      ["Oxy-Acetylene Torch Kit", 1],
+      ["Cutting Tips", 3],
+      ["Rosebud Heating Tip", 1],
+      ["Flashback Arrestors", 2],
+      ["Striker", 2],
+    ],
+    "Lifting Heavy": [
+      ["Engine Hoist 2-Ton", 1],
+      ["Load Leveler", 1],
+      ["Transmission Jack 1-Ton", 1],
+      ["50-Ton Hydraulic Jack", 1],
+    ],
+    "Rigging Heavy": [
+      ["Nylon Sling 4\" x 20'", 2],
+      ["Nylon Sling 6\" x 30'", 2],
+      ["Come-Along 2-Ton", 1],
+      ["Lever Hoist 3-Ton", 1],
+      ["Snatch Block 5-Ton", 2],
+      ["Spreader Bar 4'", 1],
+      ["Spreader Bar 8'", 1],
+    ],
+    "Pry Bars Heavy": [
+      ["Digging Bar 60\"", 1],
+      ["Track Bar (Spud Bar)", 1],
+      ["Rolling Head Pry Bar 63\"", 1],
+      ["Alignment Punches Tapered", 1],
+    ],
+    "Hydraulic Service": [
+      ["Hydraulic Hose Crimper", 1],
+      ["Crimping Dies", 1],
+      ["Seal Driver Set", 1],
+      ["Slide Hammer", 1],
+    ],
+    "Pullers": [
+      ["2-Jaw Puller 6\"", 1],
+      ["2-Jaw Puller 10\"", 1],
+      ["3-Jaw Puller 8\"", 1],
+      ["Bearing Separator Set", 1],
+    ],
+    "Engine Service": [
+      ["Valve Spring Compressor", 1],
+      ["Piston Ring Compressor", 1],
+      ["Ring Expander", 1],
+      ["Ridge Reamer", 1],
+    ],
+    "Chemicals Advanced": [
+      ["Loctite 290 Green Wicking", 1],
+      ["Loctite 680 Retaining Compound", 1],
+      ["Permatex High-Temp Red", 2],
+      ["Permatex Copper", 1],
+      ["Gasket Remover Spray", 2],
+    ],
+    "Greases": [
+      ["Moly-Lithium EP2 Grease", 1],
+      ["High-Temp Bearing Grease", 1],
+      ["Engine Assembly Lube", 1],
+    ],
+    "Cleaners Advanced": [
+      ["Electrical Contact Cleaner", 1],
+      ["Heavy-Duty Degreaser", 2],
+      ["Carburetor Dip 5-Gal", 1],
+    ],
+    "Lubricants": [
+      ["Dry Graphite Lubricant", 2],
+      ["Silicone Lubricant Spray", 1],
+      ["Chain & Cable Lubricant", 1],
+      ["Pneumatic Tool Oil", 3],
+    ],
+    "Abrasives": [
+      ["Flap Discs Assorted", 1],
+      ["Wire Wheel Brushes", 3],
+      ["Cup Brush 4\"", 2],
+      ["Cut-Off Wheels", 25],
+      ["Grinding Discs", 10],
+    ],
+    "Soldering Station": [
+      ["Soldering Station", 1],
+      ["Soldering Gun 260W", 1],
+      ["Butane Soldering Iron", 1],
+    ],
+    "MIG Welding": [
+      ["MIG Welder", 1],
+      ["MIG Wire ER70S-6", 2],
+    ],
+    "Stick Welding": [
+      ["7018 Electrodes", 2],
+      ["6011 Electrodes", 2],
+      ["6013 Electrodes", 1],
+    ],
+    "Welding Gas": [
+      ["Argon 125cf", 1],
+      ["75/25 Argon/CO2 125cf", 1],
+    ],
+    "Welding Accessories": [
+      ["Welding Table", 1],
+      ["Welding Clamps", 1],
+      ["Welding Magnets", 1],
+      ["Chipping Hammer", 2],
+      ["Anti-Spatter Spray", 2],
+      ["Welding Blanket", 1],
+    ],
+    "Air Compressor": [
+      ["Air Compressor 60-Gallon", 1],
+    ],
+    "Air Impact": [
+      ["1/2\" Air Impact Wrench", 1],
+      ["3/4\" Air Impact Wrench", 1],
+      ["1\" Air Impact Wrench", 1],
+      ["Air Ratchet 3/8\"", 1],
+      ["Air Die Grinder", 1],
+      ["Air Cut-Off Tool", 1],
+    ],
+    "Air Accessories": [
+      ["Air Hose 3/8\" x 50'", 2],
+      ["Air Hose 1/2\" x 50'", 1],
+      ["Air Hose Reel", 1],
+      ["Quick-Connect Fittings", 2],
+    ],
+    "Shop Equipment": [
+      ["Bench Grinder 8\"", 1],
+      ["Parts Washer 20-Gallon", 1],
+      ["Pressure Washer 3,000 PSI", 1],
+    ],
+    "Field Service": [
+      ["Generator 3,500W Inverter", 1],
+      ["Portable Work Table", 1],
+    ],
+    "Storage": [
+      ["Side Cabinet", 1],
+      ["Service Cart", 1],
+      ["Parts Organizer Bins", 2],
+    ],
+  },
+  "Priority 3": {
+    "Power Tools": [
+      ["Rotary Hammer SDS Plus", 1],
+      ["Hydraulic Knockout Punch", 1],
+    ],
+    "Power Distribution": [
+      ["Portable Generator 3500W", 1],
+    ],
+    "Diagnostics": [
+      ["Combustion Leak Tester", 1],
+      ["Diesel Injector Pop Tester", 1],
+      ["Hydraulic Contamination Kit", 1],
+      ["Vacuum Fill Kit", 1],
+      ["Breakout Box", 1],
+    ],
+    "OEM Software": [
+      ["Liebherr Software", 1],
+      ["Volvo Tech Tool", 1],
+    ],
+    "Electrical": [
+      ["Relay Tester", 1],
+      ["Terminal Removal Set", 1],
+      ["UV Flashlight", 1],
+    ],
+    "Wrenches": [
+      ["Extra Long Wrench Metric", 1],
+      ["Crowfoot Metric Set", 1],
+      ["Pipe Wrenches Set", 3],
+    ],
+    "Torque Tools": [
+      ["Torque Wrench 3/4\"", 1],
+      ["Torque Multiplier 3/4\"", 1],
+    ],
+    "1\" Drive": [
+      ["1\" Drive Ratchet", 1],
+    ],
+    "1-1/2\" Drive": [
+      ["1-1/2\" Socket Set", 1],
+      ["1-1/2\" Breaker Bar 60\"", 1],
+      ["1-1/2\" Slugging Wrench", 1],
+    ],
+    "Specialty Sockets": [
+      ["Torx Bit Sockets", 1],
+      ["Triple Square (XZN) Set", 1],
+    ],
+    "Pliers": [
+      ["Extra Large Snap Ring 16\"", 1],
+    ],
+    "Precision Measuring": [
+      ["Micrometer Set 3-6\"", 1],
+      ["Depth Micrometer", 1],
+      ["Telescoping Gauges", 1],
+      ["Plastigage", 5],
+    ],
+    "Extractors": [
+      ["Multi-Spline Extractor Set", 1],
+    ],
+    "Threading": [
+      ["Thread File Set", 1],
+      ["Carbide Burr Set", 1],
+    ],
+    "Cutting": [
+      ["Aviation Snips", 1],
+    ],
+    "Lifting": [
+      ["Air/Hydraulic Floor Jack 20-Ton", 1],
+    ],
+    "Hydraulic Service": [
+      ["Hose Skiver", 1],
+      ["Cylinder Hone Flex-Hone", 1],
+      ["Gland Nut Wrench", 1],
+    ],
+    "Pullers Heavy": [
+      ["Hydraulic Puller 10-Ton", 1],
+      ["Hydraulic Puller 30-Ton", 1],
+      ["Hydraulic Puller 50-Ton", 1],
+      ["Bearing Race Driver Set", 1],
+      ["Bushing Driver Set", 1],
+      ["Hydraulic Press 20-Ton", 1],
+    ],
+    "Track & Undercarriage": [
+      ["Track Press 75-Ton", 1],
+      ["Master Link Tool Set", 1],
+      ["Track Adjusting Wrench", 1],
+    ],
+    "Engine Service": [
+      ["Cylinder Hone Rigid", 1],
+      ["Flywheel Holder", 1],
+      ["Harmonic Balancer Puller", 1],
+    ],
+    "Brand Specific": [
+      ["CAT Injector Puller", 1],
+      ["Komatsu Injector Puller", 1],
+      ["Deere Injector Puller", 1],
+    ],
+    "TIG Welding": [
+      ["TIG Welder", 1],
+      ["TIG Tungsten", 1],
+      ["TIG Filler Rod Steel", 1],
+      ["TIG Filler Rod Stainless", 1],
+      ["TIG Filler Rod Aluminum", 1],
+    ],
+    "MIG Advanced": [
+      ["MIG Wire Stainless", 1],
+      ["MIG Wire Aluminum", 1],
+      ["Flux-Core Wire", 2],
+      ["Spool Gun", 1],
+    ],
+    "Stick Advanced": [
+      ["7024 Electrodes", 1],
+      ["Ni-Rod Nickel Electrodes", 1],
+      ["Electrode Oven", 1],
+    ],
+    "Air Tools": [
+      ["Air Hammer", 1],
+      ["Air Drill 3/8\"", 1],
+      ["Air Sander DA 6\"", 1],
+    ],
+    "Shop Equipment": [
+      ["Band Saw Horizontal", 1],
+      ["Sand Blasting Cabinet", 1],
+    ],
+    "Field Service": [
+      ["Generator 7,000W", 1],
+      ["Portable Light Tower", 1],
+    ],
+    "Storage": [
+      ["Field Service Tool Box", 1],
+      ["Job Box Gang Box", 1],
+    ],
+  },
+};
+
+const tierInfo = {
+  "Priority 1": { desc: "Essential - Day 1", cost: "$13,415" },
+  "Priority 2": { desc: "Core - Month 3-6", cost: "$15,500" },
+  "Priority 3": { desc: "Professional - Month 6-12", cost: "$13,000" },
+};
+
+let currentTier = "Priority 1";
+let checked = JSON.parse(localStorage.getItem('bsm-checklist-all') || '{}');
+let expanded = JSON.parse(localStorage.getItem('bsm-expanded-all') || '{}');
+
+function save() {
+  localStorage.setItem('bsm-checklist-all', JSON.stringify(checked));
+  localStorage.setItem('bsm-expanded-all', JSON.stringify(expanded));
+}
+
+function updateProgress() {
+  const data = toolData[currentTier];
+  let total = 0, done = 0;
+  for (const cat in data) {
+    data[cat].forEach((item, i) => {
+      total++;
+      if (checked[`${currentTier}-${cat}-${i}`]) done++;
+    });
+  }
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-text').textContent = `${done}/${total} items`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = `${pct}%`;
+  document.getElementById('tier-info').textContent = `${tierInfo[currentTier].desc} • ${tierInfo[currentTier].cost}`;
+}
+
+function toggleItem(cat, i) {
+  const key = `${currentTier}-${cat}-${i}`;
+  checked[key] = !checked[key];
+  save();
+  render();
+}
+
+function toggleCategory(cat) {
+  const key = `${currentTier}-${cat}`;
+  expanded[key] = !expanded[key];
+  save();
+  render();
+}
+
+function switchTier(tier) {
+  currentTier = tier;
+  render();
+}
+
+function resetCurrent() {
+  if (confirm(`Clear all checkmarks for ${currentTier}?`)) {
+    const prefix = `${currentTier}-`;
+    for (const key in checked) {
+      if (key.startsWith(prefix)) delete checked[key];
+    }
+    save();
+    render();
+  }
+}
+
+function resetAll() {
+  if (confirm('Clear ALL checkmarks for ALL tiers?')) {
+    checked = {};
+    save();
+    render();
+  }
+}
+
+function renderTabs() {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  for (const tier in toolData) {
+    const tab = document.createElement('div');
+    tab.className = `tab${tier === currentTier ? ' active' : ''}`;
+    tab.textContent = tier.replace('Priority ', 'P');
+    tab.onclick = () => switchTier(tier);
+    tabsEl.appendChild(tab);
+  }
+}
+
+function render() {
+  renderTabs();
+  
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  
+  const data = toolData[currentTier];
+  
+  for (const cat in data) {
+    const items = data[cat];
+    const checkedCount = items.filter((_, i) => checked[`${currentTier}-${cat}-${i}`]).length;
+    const isComplete = checkedCount === items.length;
+    const expKey = `${currentTier}-${cat}`;
+    const isExpanded = expanded[expKey] !== false;
+
+    const catDiv = document.createElement('div');
+    catDiv.className = `category${isComplete ? ' complete' : ''}`;
+
+    const header = document.createElement('div');
+    header.className = 'cat-header';
+    header.onclick = () => toggleCategory(cat);
+    header.innerHTML = `
+      <span class="cat-name${isComplete ? ' complete' : ''}">${isComplete ? '✓ ' : ''}${cat}</span>
+      <div class="cat-right">
+        <span class="cat-count">${checkedCount}/${items.length}</span>
+        <span class="cat-arrow">${isExpanded ? '▼' : '▶'}</span>
+      </div>
+    `;
+    catDiv.appendChild(header);
+
+    if (isExpanded) {
+      const itemsDiv = document.createElement('div');
+      itemsDiv.className = 'cat-items';
+      items.forEach((item, i) => {
+        const isChecked = checked[`${currentTier}-${cat}-${i}`];
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        itemDiv.onclick = () => toggleItem(cat, i);
+        itemDiv.innerHTML = `
+          <div class="checkbox${isChecked ? ' checked' : ''}"></div>
+          <span class="item-name${isChecked ? ' checked' : ''}">${item[0]}</span>
+          <span class="item-qty">×${item[1]}</span>
+        `;
+        itemsDiv.appendChild(itemDiv);
+      });
+      catDiv.appendChild(itemsDiv);
+    }
+
+    container.appendChild(catDiv);
+  }
+
+  updateProgress();
+}
+
+render();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+  </script>
+</body>
+</html>
